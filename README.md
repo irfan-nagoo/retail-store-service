@@ -9,4 +9,4 @@ This sample SpringBoot Microservice provides various REST APIs for managing Onli
     
 The database design script (supports MySQL) is also included as part of this application. This application can work with any RDBMS technology.
 
-Here is the Swagger url for various REST endpoint on local: http://localhost:8081/swagger-ui.html
+Here is the Swagger url for various REST endpoints on local: http://localhost:8081/swagger-ui.html
