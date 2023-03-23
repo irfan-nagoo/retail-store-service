@@ -8,10 +8,12 @@ import com.sample.retailstore.domain.OrderDetailObject;
 import com.sample.retailstore.domain.OrderObject;
 import com.sample.retailstore.entity.Order;
 import com.sample.retailstore.entity.Status;
+import com.sample.retailstore.entity.User;
 import com.sample.retailstore.exception.ActionNotAllowedException;
 import com.sample.retailstore.exception.RecordNotFoundException;
 import com.sample.retailstore.mapper.OrderMapper;
 import com.sample.retailstore.repository.OrderRepository;
+import com.sample.retailstore.repository.UserRepository;
 import com.sample.retailstore.request.OrderRequest;
 import com.sample.retailstore.request.UpdateOrderRequest;
 import com.sample.retailstore.response.OrderResponse;
@@ -47,6 +49,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
 
+    private final UserRepository userRepository;
+
     private final OrderMapper orderMapper;
 
     private final StatusCache statusCache;
@@ -55,6 +59,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse getOrderList() {
+        LOGGER.info("Processing order list request");
         List<OrderObject> orderObjList = StreamSupport.stream(orderRepository.findAll().spliterator(), false)
                 .map(orderMapper::orderToOrderObject)
                 .collect(Collectors.toList());
@@ -65,6 +70,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse getOrderById(Long id) {
+        LOGGER.info("Processing order by Id");
         Optional<Order> order = orderRepository.findById(id);
         if (order.isPresent()) {
             OrderResponse response = new OrderResponse(HttpStatus.OK.name(), GET_SUCCESS_MSG);
@@ -74,6 +80,26 @@ public class OrderServiceImpl implements OrderService {
             throw new RecordNotFoundException(ORDER_NOT_FOUND);
         }
     }
+
+    @Override
+    public OrderResponse getOrdersByUserId(Long userId) {
+        LOGGER.info("Processing order by user Id");
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (!userOpt.isPresent()) {
+            throw new RecordNotFoundException("User Not Found");
+        }
+        List<Order> orderList = orderRepository.findByUser(userOpt.get());
+        if (!orderList.isEmpty()) {
+            List<OrderObject> orderObjList = orderList.stream().map(orderMapper::orderToOrderObject)
+                    .collect(Collectors.toList());
+            OrderResponse response = new OrderResponse(HttpStatus.OK.name(), String.format(LIST_SUCCESS_MSG, orderObjList.size()));
+            response.setOrders(orderObjList);
+            return response;
+        } else {
+            throw new RecordNotFoundException(ORDER_NOT_FOUND);
+        }
+    }
+
 
     @Override
     public OrderResponse placeOrder(OrderRequest request) {
@@ -155,7 +181,6 @@ public class OrderServiceImpl implements OrderService {
             Order order = orderOptional.get();
             Status status = statusCache.getStatus(ORDER_STATUS, request.getStatus().getValue());
             order.setStatus(status);
-            order.setVersion(order.getVersion() + 1);
             order.setUpdatedBy(request.getUpdatedBy());
             order.setUpdateDate(LocalDateTime.now());
             orderRepository.save(order);

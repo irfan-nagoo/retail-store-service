@@ -9,10 +9,12 @@ import com.sample.retailstore.domain.OrderObject;
 import com.sample.retailstore.entity.Billing;
 import com.sample.retailstore.entity.Order;
 import com.sample.retailstore.entity.Status;
+import com.sample.retailstore.entity.User;
 import com.sample.retailstore.exception.ActionNotAllowedException;
 import com.sample.retailstore.exception.RecordNotFoundException;
 import com.sample.retailstore.mapper.OrderMapperImpl;
 import com.sample.retailstore.repository.OrderRepository;
+import com.sample.retailstore.repository.UserRepository;
 import com.sample.retailstore.request.OrderRequest;
 import com.sample.retailstore.request.UpdateOrderRequest;
 import com.sample.retailstore.response.OrderResponse;
@@ -41,6 +43,9 @@ class OrderServiceImplTest {
 
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private OrderMapperImpl orderMapper;
@@ -81,18 +86,29 @@ class OrderServiceImplTest {
     }
 
     @Test
-    void placeOrder_Success() {
+    void getOrderByUserId_Success() {
         OrderObject orderObject = new OrderObject();
         orderObject.setOrderNumber("OR1234567");
-        OrderDetailObject orderDetailObject = new OrderDetailObject();
-        ItemObject itemObject = new ItemObject();
-        itemObject.setName("Sample Item");
-        itemObject.setQuantity(1L);
-        itemObject.setPrice(BigDecimal.TEN);
-        orderDetailObject.setItem(itemObject);
-        orderDetailObject.setQuantity(1L);
-        orderObject.setOrderDetails(Collections.singletonList(orderDetailObject));
-        orderObject.setBilling(new BillingObject());
+        when(userRepository.findById(any())).thenReturn(Optional.of(new User()));
+        when(orderRepository.findByUser(any())).thenReturn(Collections.singletonList(new Order()));
+        when(orderMapper.orderToOrderObject(any())).thenReturn(orderObject);
+        OrderResponse response = orderService.getOrdersByUserId(1L);
+        assertEquals(1, response.getOrders().size());
+        assertEquals("OR1234567", response.getOrders().get(0).getOrderNumber());
+    }
+
+    @Test
+    void getOrderByUserId_Exception() {
+        when(userRepository.findById(any())).thenReturn(Optional.of(new User()));
+        when(orderRepository.findByUser(any())).thenReturn(Collections.emptyList());
+        RecordNotFoundException exception = assertThrows(RecordNotFoundException.class, () -> orderService.getOrdersByUserId(1L));
+        assertEquals(ORDER_NOT_FOUND, exception.getMessage());
+    }
+
+
+    @Test
+    void placeOrder_Success() {
+        OrderObject orderObject = getOrderObject();
         Order order = new Order();
         order.setOrderNumber("OR1234567");
         order.setStatus(new Status(1L, "any", "Placed"));
@@ -108,18 +124,8 @@ class OrderServiceImplTest {
 
     @Test
     void cancelOrder() {
-        OrderObject orderObject = new OrderObject();
+        OrderObject orderObject = getOrderObject();
         orderObject.setStatus(StatusType.ORDER_PLACED);
-        orderObject.setOrderNumber("OR1234567");
-        OrderDetailObject orderDetailObject = new OrderDetailObject();
-        ItemObject itemObject = new ItemObject();
-        itemObject.setName("Sample Item");
-        itemObject.setQuantity(1L);
-        itemObject.setPrice(BigDecimal.TEN);
-        orderDetailObject.setItem(itemObject);
-        orderDetailObject.setQuantity(1L);
-        orderObject.setOrderDetails(Collections.singletonList(orderDetailObject));
-        orderObject.setBilling(new BillingObject());
         Order order = new Order();
         order.setOrderNumber("OR1234567");
         order.setStatus(new Status(1L, "any", "Placed"));
@@ -167,5 +173,20 @@ class OrderServiceImplTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> orderService.updateOrderStatus(request));
         assertEquals(String.format(ORDER_INVALID_INPUT_MSG, request.getOrderId(),
                 request.getStatus().getValue()), exception.getMessage());
+    }
+
+    private OrderObject getOrderObject() {
+        OrderObject orderObject = new OrderObject();
+        orderObject.setOrderNumber("OR1234567");
+        OrderDetailObject orderDetailObject = new OrderDetailObject();
+        ItemObject itemObject = new ItemObject();
+        itemObject.setName("Sample Item");
+        itemObject.setQuantity(1L);
+        itemObject.setPrice(BigDecimal.TEN);
+        orderDetailObject.setItem(itemObject);
+        orderDetailObject.setQuantity(1L);
+        orderObject.setOrderDetails(Collections.singletonList(orderDetailObject));
+        orderObject.setBilling(new BillingObject());
+        return orderObject;
     }
 }

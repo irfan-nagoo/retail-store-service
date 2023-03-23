@@ -9,6 +9,8 @@ import com.sample.retailstore.request.UserRequest;
 import com.sample.retailstore.response.UserResponse;
 import com.sample.retailstore.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +32,15 @@ import static com.sample.retailstore.constants.MessageConstants.*;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+
     private final UserRepository userRepository;
 
     private final UserMapper userMapper;
 
     @Override
     public UserResponse getUserList() {
+        LOGGER.info("Processing user list request");
         List<UserObject> userObjList = StreamSupport.stream(userRepository.findAll().spliterator(), false)
                 .map(userMapper::userToUserObject)
                 .collect(Collectors.toList());
@@ -46,6 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(Long id) {
+        LOGGER.info("Processing user by Id request");
         Optional<User> user = userRepository.findById(id);
         if (user.isPresent()) {
             UserResponse response = new UserResponse(HttpStatus.OK.name(), GET_SUCCESS_MSG);
@@ -58,6 +64,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse saveUser(UserRequest userRequest) {
+        LOGGER.info("Processing save user request");
         User user = userMapper.userObjectToUser(userRequest.getUser());
         user = userRepository.save(user);
         UserResponse response = new UserResponse(HttpStatus.OK.name(), SAVE_SUCCESS_MSG);

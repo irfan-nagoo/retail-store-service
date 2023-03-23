@@ -38,7 +38,7 @@ public class RetailStoreControllerAdvice {
     }
 
     @ExceptionHandler(ActionNotAllowedException.class)
-    public ResponseEntity<ErrorResponse> handleNotAllowedException(ActionNotAllowedException nae) {
+    public ResponseEntity<ErrorResponse> handleActionNotAllowedException(ActionNotAllowedException nae) {
         LOGGER.error("Action Not allowed: ", nae);
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.name(), nae.getMessage());
         return ResponseEntity.badRequest().body(response);

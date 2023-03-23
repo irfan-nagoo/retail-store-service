@@ -6,7 +6,10 @@ import com.sample.retailstore.domain.OrderDetailObject;
 import com.sample.retailstore.request.BillingRequest;
 import com.sample.retailstore.response.BillingResponse;
 import com.sample.retailstore.service.BillingService;
+import com.sample.retailstore.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,8 +29,11 @@ import static com.sample.retailstore.constants.RetailStoreConstants.*;
 @RequiredArgsConstructor
 public class BillingServiceImpl implements BillingService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ItemService.class);
+
     @Override
     public BillingResponse generateBill(BillingRequest request) {
+        LOGGER.info("Processing generate bill request");
         BillingObject billing = new BillingObject();
         BigDecimal totalAmount = BigDecimal.ZERO;
         for (OrderDetailObject od : request.getOrderDetails()) {

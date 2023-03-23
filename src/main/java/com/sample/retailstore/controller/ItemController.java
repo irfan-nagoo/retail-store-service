@@ -37,8 +37,8 @@ public class ItemController {
     /**
      * Get Item by Id
      *
-     * @param id
-     * @return
+     * @param id item id
+     * @return item
      */
     @GetMapping("/{id}")
     public ItemResponse getItemById(@PathVariable("id") Long id) {
@@ -48,8 +48,8 @@ public class ItemController {
     /**
      * Get Item by Category
      *
-     * @param category
-     * @return
+     * @param category item category
+     * @return list of items
      */
     @GetMapping("/category/{category}")
     public ItemResponse getItemByCategory(@PathVariable("category") String category) {
@@ -59,8 +59,8 @@ public class ItemController {
     /**
      * Save or Update Item
      *
-     * @param request
-     * @return
+     * @param request item
+     * @return saved item
      */
     @PostMapping("/save")
     public ItemResponse saveItem(@Valid @RequestBody ItemRequest request) {

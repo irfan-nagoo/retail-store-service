@@ -12,6 +12,8 @@ import com.sample.retailstore.request.ItemRequest;
 import com.sample.retailstore.response.ItemResponse;
 import com.sample.retailstore.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,8 @@ import static com.sample.retailstore.constants.MessageConstants.*;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ItemService.class);
+
     private final ItemRepository itemRepository;
 
     private final ItemMapper itemMapper;
@@ -41,6 +45,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponse getItemList(int pageNo, int pageSize, String sortBy, String sortDirection) {
+        LOGGER.info("Processing item list request");
         PageRequest pageRequest = PageRequest.of(pageNo, pageSize, getOrderBy(sortBy, sortDirection));
         List<ItemObject> itemObjList = itemRepository.findAll(pageRequest).get()
                 .map(itemMapper::itemToItemObject)
@@ -52,6 +57,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponse getItemById(Long id) {
+        LOGGER.info("Processing item by id request");
         Optional<Item> item = itemRepository.findById(id);
         if (item.isPresent()) {
             ItemResponse response = new ItemResponse(HttpStatus.OK.name(), GET_SUCCESS_MSG);
@@ -64,6 +70,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponse getItemByCategory(CategoryType categoryType) {
+        LOGGER.info("Processing item by category request");
         List<Category> subCategoryList = categoryCache.getSubCategoryList(categoryType);
         List<Item> items = itemRepository.findByCategoryIn(subCategoryList);
         if (!items.isEmpty()) {
@@ -80,6 +87,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponse saveItem(ItemRequest request) {
+        LOGGER.info("Processing save item request");
         Item item = itemMapper.itemObjectToItem(request.getItem());
         item = itemRepository.save(item);
         ItemResponse response = new ItemResponse(HttpStatus.OK.name(), SAVE_SUCCESS_MSG);

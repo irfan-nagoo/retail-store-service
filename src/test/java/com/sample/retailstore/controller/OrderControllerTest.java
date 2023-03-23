@@ -55,6 +55,15 @@ class OrderControllerTest {
     }
 
     @Test
+    void getOrderByUserId_Success() throws Exception {
+        when(orderService.getOrdersByUserId(anyLong())).thenReturn(new OrderResponse(HttpStatus.OK.name(), "Some message"));
+        mockMvc.perform(get("/order/user/10"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(HttpStatus.OK.name())));
+    }
+
+    @Test
     void placeOrder_Success() throws Exception {
         when(orderService.placeOrder(any())).thenReturn(new OrderResponse(HttpStatus.OK.name(), "Some message"));
         OrderRequest request = new OrderRequest(getOrderObject());

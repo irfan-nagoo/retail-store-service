@@ -25,17 +25,17 @@ public class TypeCache {
 
     private final List<Type> typeCache = new ArrayList<>();
 
+    @PostConstruct
+    private void load() {
+        typeRepository.findAll().forEach(type -> typeCache.add(type));
+        LOGGER.info("Type cache initialized Successfully");
+    }
+
     public Type getType(String type, String value) {
         return typeCache.stream()
                 .filter(t -> t.equals(new Type(0l, type, value)))
                 .findAny()
                 .orElse(null);
-    }
-
-    @PostConstruct
-    private void load() {
-        typeRepository.findAll().forEach(type -> typeCache.add(type));
-        LOGGER.info("Type cache initialized Successfully");
     }
 
 }

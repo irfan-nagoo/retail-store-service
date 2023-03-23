@@ -25,6 +25,14 @@ public interface OrderService {
     OrderResponse getOrderById(Long id);
 
     /**
+     * Get Purchase orders by user id
+     *
+     * @param userId
+     * @return
+     */
+    OrderResponse getOrdersByUserId(Long userId);
+
+    /**
      * Place a purchase order
      *
      * @param request

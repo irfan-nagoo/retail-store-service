@@ -26,17 +26,17 @@ public class StatusCache {
 
     private final List<Status> statusCache = new ArrayList<>();
 
+    @PostConstruct
+    private void load() {
+        statusRepository.findAll().forEach(status -> statusCache.add(status));
+        LOGGER.info("Status cache initialized Successfully");
+    }
+
     public Status getStatus(String type, String value) {
         return statusCache.stream()
                 .filter(s -> s.equals(new Status(1l, type, value)))
                 .findAny()
                 .orElse(null);
-    }
-
-    @PostConstruct
-    private void load() {
-        statusRepository.findAll().forEach(status -> statusCache.add(status));
-        LOGGER.info("Status cache initialized Successfully");
     }
 
 }

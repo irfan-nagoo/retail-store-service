@@ -22,7 +22,7 @@ public class OrderController {
     /**
      * Get Order list
      *
-     * @return
+     * @return list of orders
      */
     @GetMapping("/list")
     public OrderResponse getOrderList() {
@@ -32,8 +32,8 @@ public class OrderController {
     /**
      * Get Order by Id
      *
-     * @param id
-     * @return
+     * @param id order id
+     * @return order response
      */
     @GetMapping("/{id}")
     public OrderResponse getOrderById(@PathVariable("id") Long id) {
@@ -41,10 +41,21 @@ public class OrderController {
     }
 
     /**
-     * Save or Update order
+     * Get Order by user Id
      *
-     * @param request
-     * @return
+     * @param userId user Id
+     * @return order response
+     */
+    @GetMapping("/user/{id}")
+    public OrderResponse getOrdersByUserId(@PathVariable("id") Long userId) {
+        return orderService.getOrdersByUserId(userId);
+    }
+
+    /**
+     * Save order
+     *
+     * @param request new order request
+     * @return order response
      */
     @PostMapping("/save")
     public OrderResponse placeOrder(@Valid @RequestBody OrderRequest request) {
@@ -55,8 +66,8 @@ public class OrderController {
     /**
      * Cancel order
      *
-     * @param request
-     * @return
+     * @param request can order request
+     * @return response
      */
     @PutMapping("/cancel")
     public OrderResponse cancelOrder(@Valid @RequestBody OrderRequest request) {
@@ -65,10 +76,10 @@ public class OrderController {
 
 
     /**
-     * Update order
+     * Update order Status
      *
-     * @param request
-     * @return
+     * @param request update order status request
+     * @return status response
      */
     @PutMapping("/update")
     public OrderResponse updateOrderStatus(@Valid @RequestBody UpdateOrderRequest request) {
